@@ -33,8 +33,16 @@ class Tasks {
     listTask.remove(task);
   }
 
-  sendData( task, bool done) {
+  sendData(task, bool done) {
     final newTask = Task(title: task, done: done);
     listTask.add(newTask);
+  }
+
+  findTask(String a) {
+    for (int i = 0; i < listTask.length; i++) {
+      if (listTask[i].title == a) {
+        return listTask[i];
+      }
+    }
   }
 }

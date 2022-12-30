@@ -8,7 +8,9 @@ class MyCard extends StatefulWidget {
 
   Function deleteTask;
 
-  MyCard(this.task, this.deleteTask);
+  Function updateTask;
+
+  MyCard(this.task, this.deleteTask, this.updateTask);
 
   @override
   State<MyCard> createState() => _MyCardState();
@@ -20,6 +22,7 @@ class _MyCardState extends State<MyCard> {
     return GestureDetector(
       onLongPress: () {
         // update task
+        widget.updateTask();
       },
       child: Stack(
         children: [

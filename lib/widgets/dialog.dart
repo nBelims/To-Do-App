@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:to_do_list/models/task.dart';
-import 'package:to_do_list/models/tasks.dart';
 
 class MyDialog extends StatelessWidget {
-  String? inputText;
-  MyDialog();
-
-  void onSave() {
-    Task createTask(String a, bool b) {
-      final newTask = Task(title: a, done: b);
-      return newTask;
-    }
-  }
-
-  void onCancel() {}
+  TextEditingController inputText;
+  Function onSave;
+  Function onCancel;
+  MyDialog(
+    this.inputText,
+    this.onSave,
+    this.onCancel,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +19,7 @@ class MyDialog extends StatelessWidget {
             child: Column(
               children: [
                 TextField(
-                    onChanged: (value) {
-                      inputText = value;
-                    },
+                    controller: inputText,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       hintText: "Add a new task",
@@ -35,9 +28,13 @@ class MyDialog extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ElevatedButton(
-                        onPressed: onSave, child: const Text("Save")),
+                        onPressed: () {
+                          onSave();
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("Save")),
                     ElevatedButton(
-                        onPressed: onCancel, child: const Text("Cancel"))
+                        onPressed: () => onCancel, child: const Text("Cancel"))
                   ],
                 )
               ],

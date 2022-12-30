@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:to_do_list/widgets/my_card.dart';
 import 'package:to_do_list/models/tasks.dart';
 import 'package:to_do_list/widgets/dialog.dart';
@@ -13,30 +14,42 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Tasks tasks = Tasks();
 
-  String? _inputText;
-  void deleteTask(Task task) {
+  final TextEditingController _inputText = TextEditingController();
+  void _deleteTask(Task task) {
     setState(() {
       tasks.deleteTask(task);
     });
   }
 
-  void onSave(String a, bool b) {
-    var newTask = Task(title: a, done: b);
+  void _onSave() {
+    print(_inputText.text);
+    var newTask = Task(title: _inputText.text ??= 'Chưa biết', done: false);
     setState(() {
       tasks.addTask(newTask);
-      Navigator.of(context).pop();
     });
-    _inputText = '';
+    _inputText.clear();
   }
 
-  void onCancel() {
+  void _onCancel() {
     setState(() {
       Navigator.of(context).pop();
     });
-    _inputText = '';
+    _inputText.clear();
   }
 
-  void createNewTask() {
+  void updateTask() {
+    void onRename(String a, bool b) {
+      var newTask = Task(title: a, done: b);
+      var oldTask = tasks.findTask(a);
+
+      setState(() {
+        tasks.addTask(newTask);
+        tasks.deleteTask(oldTask);
+        Navigator.of(context).pop();
+      });
+      _inputText.clear();
+    }
+
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -48,28 +61,38 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       TextField(
                           onChanged: (value) {
-                            _inputText = value;
+                            _inputText.text = value;
                             print(value);
                           },
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            hintText: "Add a new task",
+                            hintText: "Rename the task",
                           )),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ElevatedButton(
-                              onPressed: () => onSave(
-                                  _inputText ??= "Chưa có nghĩ ra", false),
-                              child: const Text("Save")),
+                              onPressed: () => onRename(
+                                    _inputText.text ??= "Chưa có nghĩ ra",
+                                    false,
+                                  ),
+                              child: const Text("Rename")),
                           ElevatedButton(
-                              onPressed: () => onCancel(),
+                              onPressed: () => _onCancel(),
                               child: const Text("Cancel"))
                         ],
                       )
                     ],
                   )));
           ;
+        });
+  }
+
+  void _createNewTask() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return MyDialog(_inputText,  _onSave, _onCancel);
         });
   }
 
@@ -94,11 +117,12 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.white,
         shape: const StadiumBorder(
             side: BorderSide(color: Colors.black, width: 1)),
-        onPressed: createNewTask,
+        onPressed: _createNewTask,
         child: const Icon(Icons.add, color: Colors.black),
       ),
       body: ListView.builder(
-        itemBuilder: (context, i) => MyCard(tasks.listTask[i], deleteTask),
+        itemBuilder: (context, i) =>
+            MyCard(tasks.listTask[i], _deleteTask, updateTask),
         itemCount: tasks.listTask.length,
       ),
     );
